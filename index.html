@@ -876,72 +876,16 @@
         const PJ_PIN = '1234';
 
         // Firebase Realtime DB Sync Variables
-let firebaseDb = null;
-let isCloudConnected = false;
-let currentRoomId = 'tpb73_itera_2026';
+        let firebaseDb = null;
+        let isCloudConnected = false;
+        let currentRoomId = localStorage.getItem('tpb73_room_id') || 'tpb73_itera_2026';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCFpJTCN1Iq5SZfBc8BE-VFLomqdSRmyjY",
-  authDomain: "pengumuman-dan-tugas-tpb---73.firebaseapp.com",
-  databaseURL: "https://firebasedatabase.app",
-  projectId: "pengumuman-dan-tugas-tpb---73",
-  storageBucket: "pengumuman-dan-tugas-tpb---73.firebasestorage.app",
-  messagingSenderId: "347152274565",
-  appId: "1:347152274565:web:523bd4f36992a8490c05ec"
-};
-
-window.addEventListener('DOMContentLoaded', () => {
-    // KODE PENGAMAN: Muat data lokal dulu agar web TIDAK KOSONG/PINCANG
-    try {
-        loadTasksFromStorage();
-        loadPersonalTurnIns();
-        checkNotificationStatus();
-    } catch (err) {
-        console.error("Gagal memuat data lokal:", err);
-    }
-
-    // Inisialisasi Firebase
-    try {
-        if (typeof firebase !== 'undefined') {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            firebaseDb = firebase.database();
-            
-            // Cek Koneksi Online
-            firebaseDb.ref(".info/connected").on("value", (snap) => {
-                const statusBadge = document.querySelector('.status-sync') || document.getElementById('statusSync');
-                if (snap.val() === true) {
-                    isCloudConnected = true;
-                    if(statusBadge) statusBadge.innerText = "ONLINE (CONNECTED)";
-                } else {
-                    isCloudConnected = false;
-                    if(statusBadge) statusBadge.innerText = "LOKAL (OFFLINE)";
-                }
-            });
-        }
-    } catch (e) {
-        console.error("Firebase bermasalah:", e);
-    }
-    
-    // Tampilkan dashboard utama
-    try {
-        renderDashboard();
-    } catch (err) {
-        console.error("Gagal merender dashboard:", err);
-    }
-});
-
-                if(statusBadge) statusBadge.innerText = "LOKAL (OFFLINE)";
-            }
-        });
-    } catch (e) {
-        console.error("Firebase init failed:", e);
-    }
-    
-    renderDashboard();
-});
-
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTasksFromStorage();
+            loadPersonalTurnIns();
+            checkNotificationStatus();
+            initCloudSyncFromSavedConfig();
+            renderDashboard();
             
             // Start Live Timer Engine (Every Second)
             setInterval(updateLiveClockAndStatus, 1000);
