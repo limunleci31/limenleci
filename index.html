@@ -884,7 +884,7 @@
             loadTasksFromStorage();
             loadPersonalTurnIns();
             checkNotificationStatus();
-            initCloudSyncFromSavedConfig();
+            function initCloudSyncFromSavedConfig() {     // 1. Tanam konfigurasi agar langsung aktif untuk semua pengguna     const autoFirebaseConfig = {       apiKey: "AIzaSyCFpJTCN1Iq5SZfBc8BE-VFLomqdSRmyjY",       authDomain: "://firebaseapp.com",       databaseURL: "https://pengumuman-dan-tugas-tpb---73-default-rtdb.asia-southeast1.firebasedatabase.app",       projectId: "pengumuman-dan-tugas-tpb---73",       storageBucket: "pengumuman-dan-tugas-tpb---73.firebasestorage.app",       messagingSenderId: "347152274565",       appId: "1:347152274565:web:523bd4f36992a8490c05ec"     };      const targetRoomId = "tpb73_itera_2026"; // ID Room otomatis untuk semua mhs      try {         if (typeof firebase !== 'undefined') {             if (!firebase.apps.length) {                 firebase.initializeApp(autoFirebaseConfig);             }             firebaseDb = firebase.database();             currentRoomId = targetRoomId;             isCloudConnected = true;              // Jalankan fungsi sinkronisasi data dari Firebase ke layar di sini             // Contoh nama fungsi bawaan template Anda biasanya: syncData() atau listenToDatabase()             if (typeof listenToDatabase === 'function') {                 listenToDatabase(targetRoomId);             }                          console.log("Cloud Sync otomatis aktif untuk room: " + targetRoomId);         }     } catch (error) {         console.error("Gagal menghubungkan Cloud Sync otomatis:", error);     } }();
             renderDashboard();
             
             // Start Live Timer Engine (Every Second)
