@@ -882,37 +882,56 @@ let currentRoomId = 'tpb73_itera_2026';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCFpJTCN1Iq5SZfBc8BE-VFLomqdSRmyjY",
-  authDomain: "://firebaseapp.com",
-  databaseURL: "https://pengumuman-dan-tugas-tpb---73-default-rtdb.asia-southeast1.firebasedatabase.app",
+  authDomain: "pengumuman-dan-tugas-tpb---73.firebaseapp.com",
+  databaseURL: "https://firebasedatabase.app",
   projectId: "pengumuman-dan-tugas-tpb---73",
   storageBucket: "pengumuman-dan-tugas-tpb---73.firebasestorage.app",
   messagingSenderId: "347152274565",
   appId: "1:347152274565:web:523bd4f36992a8490c05ec"
 };
 
-
-// Inisialisasi otomatis saat web dibuka
 window.addEventListener('DOMContentLoaded', () => {
-    loadTasksFromStorage();
-    loadPersonalTurnIns();
-    checkNotificationStatus();
-    
-    // Langsung hubungkan ke Firebase tanpa perlu input manual di popup
+    // KODE PENGAMAN: Muat data lokal dulu agar web TIDAK KOSONG/PINCANG
     try {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        loadTasksFromStorage();
+        loadPersonalTurnIns();
+        checkNotificationStatus();
+    } catch (err) {
+        console.error("Gagal memuat data lokal:", err);
+    }
+
+    // Inisialisasi Firebase
+    try {
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            firebaseDb = firebase.database();
+            
+            // Cek Koneksi Online
+            firebaseDb.ref(".info/connected").on("value", (snap) => {
+                const statusBadge = document.querySelector('.status-sync') || document.getElementById('statusSync');
+                if (snap.val() === true) {
+                    isCloudConnected = true;
+                    if(statusBadge) statusBadge.innerText = "ONLINE (CONNECTED)";
+                } else {
+                    isCloudConnected = false;
+                    if(statusBadge) statusBadge.innerText = "LOKAL (OFFLINE)";
+                }
+            });
         }
-        firebaseDb = firebase.database();
-        
-        // Dengar status koneksi database
-        firebaseDb.ref(".info/connected").on("value", (snap) => {
-            const statusBadge = document.querySelector('.status-sync') || document.getElementById('statusSync') || document.querySelector('.badge');
-            if (snap.val() === true) {
-                isCloudConnected = true;
-                if(statusBadge) statusBadge.innerText = "ONLINE (CONNECTED)";
-                // Jalankan fungsi sinkronisasi data ruangan di sini jika ada (misal: syncRoomData())
-            } else {
-                isCloudConnected = false;
+    } catch (e) {
+        console.error("Firebase bermasalah:", e);
+    }
+    
+    // Tampilkan dashboard utama
+    try {
+        renderDashboard();
+    } catch (err) {
+        console.error("Gagal merender dashboard:", err);
+    }
+});
+
                 if(statusBadge) statusBadge.innerText = "LOKAL (OFFLINE)";
             }
         });
