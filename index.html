@@ -876,16 +876,53 @@
         const PJ_PIN = '1234';
 
         // Firebase Realtime DB Sync Variables
-        let firebaseDb = null;
-        let isCloudConnected = false;
-        let currentRoomId = localStorage.getItem('tpb73_room_id') || 'tpb73_itera_2026';
+let firebaseDb = null;
+let isCloudConnected = false;
+let currentRoomId = 'tpb73_itera_2026';
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadTasksFromStorage();
-            loadPersonalTurnIns();
-            checkNotificationStatus();
-            initCloudSyncFromSavedConfig();
-            renderDashboard();
+// Konfigurasi Firebase Anda yang sudah ditanam langsung
+const firebaseConfig = {
+  apiKey: "AIzaSyCFpJTCN1Iq5SZfBc8BE-VFLomqdSRmyjY",
+  authDomain: "://firebaseapp.com",
+  databaseURL: "https://firebasedatabase.app",
+  projectId: "pengumuman-dan-tugas-tpb---73",
+  storageBucket: "pengumuman-dan-tugas-tpb---73.firebasestorage.app",
+  messagingSenderId: "347152274565",
+  appId: "1:347152274565:web:523bd4f36992a8490c05ec"
+};
+
+// Inisialisasi otomatis saat web dibuka
+window.addEventListener('DOMContentLoaded', () => {
+    loadTasksFromStorage();
+    loadPersonalTurnIns();
+    checkNotificationStatus();
+    
+    // Langsung hubungkan ke Firebase tanpa perlu input manual di popup
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        firebaseDb = firebase.database();
+        
+        // Dengar status koneksi database
+        firebaseDb.ref(".info/connected").on("value", (snap) => {
+            const statusBadge = document.querySelector('.status-sync') || document.getElementById('statusSync') || document.querySelector('.badge');
+            if (snap.val() === true) {
+                isCloudConnected = true;
+                if(statusBadge) statusBadge.innerText = "ONLINE (CONNECTED)";
+                // Jalankan fungsi sinkronisasi data ruangan di sini jika ada (misal: syncRoomData())
+            } else {
+                isCloudConnected = false;
+                if(statusBadge) statusBadge.innerText = "LOKAL (OFFLINE)";
+            }
+        });
+    } catch (e) {
+        console.error("Firebase init failed:", e);
+    }
+    
+    renderDashboard();
+});
+
             
             // Start Live Timer Engine (Every Second)
             setInterval(updateLiveClockAndStatus, 1000);
