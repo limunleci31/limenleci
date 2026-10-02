@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FFE600">
+    <title>Pengumuman dan Tugas TPB - 73 | ITERA Realtime Sync</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- QR Code Generator CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Firebase Realtime Database SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- Google Fonts: Space Grotesk, Plus Jakarta Sans, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Plus+Jakarta+Sans:ital,wght@0,500;0,700;0,800;1,600&family=Space+Grotesk:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-yellow: #FFE600;
+            --brand-red: #FF0033;
+            --brand-black: #0F0F0F;
+            --brand-white: #FFFFFF;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F8F8F5;
+            color: var(--brand-black);
+            background-image: 
+                radial-gradient(var(--brand-black) 1px, transparent 1px),
+                linear-gradient(to right, rgba(15, 15, 15, 0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+            /* Safe area for mobile notch/home bar */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .font-grotesk { font-family: 'Space Grotesk', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Neo-Brutalist Responsive Classes */
+        .brutal-card {
+            background-color: var(--brand-white);
+            border: 3px solid var(--brand-black);
+            box-shadow: 4px 4px 0px var(--brand-black);
+            border-radius: 16px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+        }
+
+        /* Desktop optimizations */
+        @media (min-width: 1024px) {
+            .brutal-card {
+                border-width: 3.5px;
+                box-shadow: 6px 6px 0px var(--brand-black);
+            }
+            .brutal-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 8px 8px 0px var(--brand-black);
+            }
+        }
+
+        .brutal-btn {
+            border: 2.5px solid var(--brand-black);
+            box-shadow: 3px 3px 0px var(--brand-black);
+            font-weight: 800;
+            transition: all 0.15s ease-out;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            min-height: 44px; /* Better touch target for mobile */
+        }
+
+        @media (min-width: 768px) {
+            .brutal-btn {
+                min-height: 38px; /* Standard for desktop */
+                border-width: 3px;
+                box-shadow: 4px 4px 0px var(--brand-black);
+            }
+            .brutal-btn:hover {
+                transform: translate(-2px, -2px);
+                box-shadow: 6px 6px 0px var(--brand-black);
+            }
+        }
+
+        .brutal-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--brand-black);
+        }
+
+        .brutal-badge {
+            border: 2px solid var(--brand-black);
+            font-weight: 800;
+            border-radius: 8px;
+            text-transform: uppercase;
+            font-size: clamp(0.65rem, 1.5vw, 0.75rem); /* Fluid text scaling */
+            letter-spacing: 0.04em;
+            padding: 0.25rem 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            white-space: nowrap;
+        }
+
+        .brutal-input {
+            border: 2.5px solid var(--brand-black);
+            box-shadow: 3px 3px 0px var(--brand-black);
+            border-radius: 12px;
+            font-weight: 700;
+            transition: all 0.15s ease;
+        }
+
+        .brutal-input:focus {
+            box-shadow: 5px 5px 0px var(--brand-black);
+            outline: none;
+            background-color: #FFFDF0;
+        }
+
+        .task-completed-card {
+            border-color: #059669 !important;
+            background-color: #ECFDF5 !important;
+        }
+
+        /* Mobile Bottom Sheet Modal Styling */
+        @media (max-width: 767px) {
+            .modal-content-container {
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                border-top-left-radius: 24px !important;
+                border-top-right-radius: 24px !important;
+                max-height: 85vh !important;
+                padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+            }
+        }
+
+        /* Minimalist Widget Mode Styles */
+        body.widget-mode {
+            background: #0f172a;
+            background-image: none;
+            color: #f8fafc;
+        }
+
+        body.widget-mode header,
+        body.widget-mode footer,
+        body.widget-mode .mobile-nav-bar,
+        body.widget-mode .non-widget-element {
+            display: none !important;
+        }
+
+        .widget-container { display: none; }
+        body.widget-mode .widget-container { display: block; }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #F1F1F1; border-left: 2px solid var(--brand-black); }
+        ::-webkit-scrollbar-thumb { background: var(--brand-yellow); border: 2px solid var(--brand-black); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-red); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased pb-20 md:pb-0">
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transform -translate-y-32 transition-all duration-300 brutal-btn bg-[#FFE600] px-4 py-3 text-black text-xs md:text-sm rounded-xl w-[90vw] md:w-auto md:max-w-sm shadow-[4px_4px_0px_#000] flex justify-center items-center">
+        <i data-lucide="bell" class="w-5 h-5 stroke-[3] shrink-0"></i>
+        <span id="toast-message" class="font-bold truncate text-center">Notifikasi sistem aktif!</span>
+    </div>
+
+    <!-- MAIN HEADER BAR -->
+    <header class="w-full bg-[#FFE600] border-b-4 border-black py-3 px-4 sm:px-6 sticky top-0 z-40">
+        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+            
+            <!-- Mobile Brand Bar & Action Toggle -->
+            <div class="w-full md:w-auto flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 cursor-pointer min-w-0" onclick="filterByTab('all')">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-black text-[#FFE600] rounded-xl border-2 border-black flex items-center justify-center p-1.5 shrink-0 shadow-[2px_2px_0px_#000]">
+                        <svg class="w-full h-full text-[#FFE600]" viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="4" y="52" width="56" height="5" rx="1"/>
+                            <rect x="12" y="24" width="8" height="28" rx="1"/>
+                            <rect x="44" y="24" width="8" height="28" rx="1"/>
+                            <path d="M8 24 C20 10, 44 10, 56 24 C46 16, 18 16, 8 24 Z"/>
+                            <path d="M26 18 L32 6 L38 18 Z"/>
+                            <circle cx="32" cy="11" r="2.5"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-lg md:text-2xl font-grotesk font-black text-black leading-none tracking-tight truncate">
+                                Tugas TPB
+                            </h1>
+                            <span class="text-[#FFE600] bg-black px-1.5 py-0.5 rounded border border-black font-mono font-extrabold text-[10px] md:text-xs shrink-0">
+                                ITERA 73
+                            </span>
+                        </div>
+                        <p class="text-[10px] md:text-xs font-bold text-black/80 truncate mt-0.5">
+                            Realtime Sync Multi-Device Dashboard
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Role Selector (Mobile/Desktop Right) -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <div class="bg-white border-2 border-black rounded-xl p-1 flex items-center shadow-[2px_2px_0px_#000]">
+                        <button id="role-btn-student" onclick="setRole('student')" class="px-2 py-1.5 md:px-3 rounded-lg text-[10px] md:text-xs font-extrabold transition-colors bg-black text-white flex items-center gap-1.5">
+                            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Mhs</span>
+                        </button>
+                        <button id="role-btn-pj" onclick="requestPJMode()" class="px-2 py-1.5 md:px-3 rounded-lg text-[10px] md:text-xs font-extrabold transition-colors text-black hover:bg-slate-100 flex items-center gap-1.5">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">PJ</span>
+                        </button>
+                    </div>
+
+                    <button id="btn-create-task" onclick="openModal()" class="brutal-btn bg-[#FF0033] text-white hover:bg-red-600 px-3 py-1.5 text-xs rounded-xl hidden min-h-0 h-auto">
+                        <i data-lucide="plus-circle" class="w-4 h-4 stroke-[3]"></i>
+                        <span class="hidden md:inline">UNGGAH</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Desktop Top Controls Bar -->
+            <div class="hidden md:flex items-center gap-2 flex-wrap justify-end shrink-0">
+                <div id="header-sync-status" class="brutal-badge bg-black text-[#FFE600] px-3 py-1.5 text-[11px] flex items-center gap-2 cursor-pointer hover:bg-slate-800" onclick="openShareModal()">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="header-sync-text">REALTIME SYNCED</span>
+                </div>
+
+                <button onclick="downloadAllICS()" class="brutal-btn bg-white text-black hover:bg-slate-100 px-3 py-1.5 text-xs rounded-xl" title="Ekspor File Kalender (.ics)">
+                    <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+                    <span>Ekspor Jadwal</span>
+                </button>
+
+                <button onclick="openShareModal()" class="brutal-btn bg-white text-black hover:bg-yellow-200 px-3 py-1.5 text-xs rounded-xl">
+                    <i data-lucide="cloud" class="w-4 h-4 text-black"></i>
+                    <span>Cloud Sync</span>
+                </button>
+
+                <button onclick="toggleWidgetMode(true)" class="brutal-btn bg-black text-white hover:bg-slate-800 px-3 py-1.5 text-xs rounded-xl">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-[#FFE600]"></i>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- REALTIME CONNECTION BANNER (Device Sync Info) -->
+    <div class="bg-black text-white py-2 px-4 border-b-4 border-black relative overflow-hidden non-widget-element">
+        <div class="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] md:text-xs font-mono font-bold">
+            <div class="flex items-center gap-2 text-[#FFE600] shrink-0 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center gap-2">
+                    <span class="bg-[#FF0033] text-white px-1.5 py-0.5 rounded font-black text-[9px] md:text-[10px] animate-pulse">LIVE</span>
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    <span id="live-time-clock" class="text-white font-extrabold tracking-wider">00:00:00 WIB</span>
+                </div>
+                <!-- Device Sync Identificator for mobile view -->
+                <div class="sm:hidden flex items-center gap-1.5 text-slate-300 bg-slate-800 px-2 py-1 rounded">
+                    <i data-lucide="smartphone" class="w-3 h-3"></i> ID: <span id="mobile-user-id" class="text-white">...</span>
+                </div>
+            </div>
+            
+            <div class="hidden sm:flex truncate text-slate-300 items-center gap-3">
+                <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Room: <span id="current-room-tag" class="text-[#FFE600] font-black underline cursor-pointer" onclick="openShareModal()">tpb73_itera_2026</span></span>
+                <span class="text-slate-600">|</span>
+                <span class="flex items-center gap-1"><i data-lucide="laptop" class="w-3.5 h-3.5"></i> User ID: <span id="desktop-user-id" class="text-emerald-400 font-black cursor-pointer" title="ID ini menyinkronkan progress pribadi Anda di semua device" onclick="openShareModal()">...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN BODY CONTENT (OPTIMIZED RESPONSIVE GRID RATIO) -->
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-6 w-full flex-grow py-5 md:py-8 non-widget-element">
+        
+        <!-- Mobile Quick Stats Bar -->
+        <div class="block lg:hidden mb-5">
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <div class="brutal-card p-2 sm:p-3 text-center bg-white flex flex-col justify-center">
+                    <span class="block text-[9px] sm:text-[10px] font-mono font-extrabold uppercase text-slate-500">Total Aktif</span>
+                    <span id="mobile-stat-upcoming" class="text-xl sm:text-2xl font-grotesk font-black text-black">0</span>
+                </div>
+                <div class="brutal-card p-2 sm:p-3 text-center bg-[#FF0033] text-white flex flex-col justify-center">
+                    <span class="block text-[9px] sm:text-[10px] font-mono font-extrabold uppercase text-red-100">Kritis &lt;24h</span>
+                    <span id="mobile-stat-urgent" class="text-xl sm:text-2xl font-grotesk font-black text-[#FFE600]">0</span>
+                </div>
+                <div class="brutal-card p-2 sm:p-3 text-center bg-[#FFE600] text-black flex flex-col justify-center">
+                    <span class="block text-[9px] sm:text-[10px] font-mono font-extrabold uppercase text-black/70">Progress</span>
+                    <span id="mobile-stat-progress" class="text-xl sm:text-2xl font-grotesk font-black text-black">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Layout Adjustments: Desktop 8/4 or 9/3 ratio -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
+            
+            <!-- MAIN CONTENT COLUMN (DESKTOP: 8/12, MOBILE: 100%) -->
+            <div class="lg:col-span-8 xl:col-span-9 space-y-4 md:space-y-6">
+                
+                <!-- SEARCH & TAB FILTER BOARD -->
+                <div class="brutal-card p-4 sm:p-5 md:p-6 bg-white space-y-4">
+                    
+                    <div class="relative">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-3 md:top-3.5 text-slate-500 stroke-[2.5]"></i>
+                        <input type="text" id="search-input" placeholder="Cari nama tugas, mata kuliah..." 
+                            class="brutal-input w-full pl-11 pr-4 py-2.5 md:py-3 text-sm md:text-base bg-white text-black placeholder:text-slate-400"
+                            oninput="handleSearchAndFilter()">
+                    </div>
+
+                    <!-- Scrollable Category Tabs -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 pt-1 no-scrollbar w-full">
+                        <button onclick="filterByTab('all')" id="tab-all" class="tab-btn brutal-btn bg-[#FFE600] text-black px-4 py-2 text-xs md:text-sm rounded-xl shrink-0">
+                            <i data-lucide="layers" class="w-4 h-4"></i> Semua (<span id="cnt-all">0</span>)
+                        </button>
+                        <button onclick="filterByTab('upcoming')" id="tab-upcoming" class="tab-btn brutal-btn bg-white text-black hover:bg-slate-100 px-4 py-2 text-xs md:text-sm rounded-xl shrink-0">
+                            <i data-lucide="clock" class="w-4 h-4 text-blue-600"></i> Aktif (<span id="cnt-upcoming">0</span>)
+                        </button>
+                        <button onclick="filterByTab('urgent')" id="tab-urgent" class="tab-btn brutal-btn bg-white text-black hover:bg-slate-100 px-4 py-2 text-xs md:text-sm rounded-xl shrink-0">
+                            <i data-lucide="flame" class="w-4 h-4 text-red-600"></i> Kritis (<span id="cnt-urgent">0</span>)
+                        </button>
+                        <button onclick="filterByTab('announcement')" id="tab-announcement" class="tab-btn brutal-btn bg-white text-black hover:bg-slate-100 px-4 py-2 text-xs md:text-sm rounded-xl shrink-0">
+                            <i data-lucide="megaphone" class="w-4 h-4 text-purple-600"></i> Info (<span id="cnt-announcement">0</span>)
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t-2 border-black text-xs md:text-sm font-bold">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="text-slate-500 font-mono text-[11px] uppercase shrink-0">Filter:</span>
+                            <select id="filter-course" onchange="handleSearchAndFilter()" class="brutal-input flex-1 sm:w-auto px-3 py-1.5 md:py-2 bg-white text-black font-bold rounded-lg truncate text-xs md:text-sm">
+                                <option value="ALL">Semua Mata Kuliah TPB</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="text-slate-500 font-mono text-[11px] uppercase shrink-0">Sort:</span>
+                            <select id="sort-order" onchange="handleSearchAndFilter()" class="brutal-input flex-1 sm:w-auto px-3 py-1.5 md:py-2 bg-white text-black font-bold rounded-lg text-xs md:text-sm">
+                                <option value="deadline-asc">Deadline Terdekat</option>
+                                <option value="deadline-desc">Deadline Terjauh</option>
+                                <option value="priority-desc">Prioritas Wajib</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TASK CARDS CONTAINER -->
+                <div id="task-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5"></div>
+
+                <!-- EMPTY STATE -->
+                <div id="empty-state" class="hidden brutal-card bg-white p-10 sm:p-16 text-center flex flex-col items-center justify-center gap-4">
+                    <div class="w-16 h-16 bg-[#FFE600] rounded-2xl border-3 border-black flex items-center justify-center text-3xl font-black shadow-[4px_4px_0px_#000]">
+                        <i data-lucide="check-check" class="w-8 h-8 text-black"></i>
+                    </div>
+                    <h3 class="text-2xl sm:text-3xl font-grotesk font-black text-black">Papan Bersih!</h3>
+                    <p class="text-sm font-bold text-slate-600 max-w-sm">
+                        Tidak ada tugas di kategori ini yang tersisa.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDEBAR COLUMN (DESKTOP: 4/12 or 3/12, STICKY POSITIONING) -->
+            <div class="hidden lg:block lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-24">
+                
+                <!-- Personal Turn-in Progress Box (Synced via Cloud) -->
+                <div class="brutal-card bg-black text-white p-5 relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-[10px] font-mono font-extrabold uppercase bg-[#FFE600] text-black px-2 py-0.5 rounded flex items-center gap-1 w-fit mb-1.5">
+                                <i data-lucide="cloud-lightning" class="w-3 h-3 text-red-600"></i> SYNCED PROGRESS
+                            </span>
+                            <h3 class="text-lg font-grotesk font-black text-white leading-tight">
+                                Catatan Pribadi
+                            </h3>
+                        </div>
+                        <div id="personal-progress-percent" class="text-3xl font-grotesk font-black text-[#FFE600]">
+                            0%
+                        </div>
+                    </div>
+
+                    <div class="w-full h-4 bg-slate-800 border-2 border-white rounded-full overflow-hidden p-0.5 mb-2.5">
+                        <div id="personal-progress-bar-fill" class="h-full bg-[#FF0033] rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+
+                    <p id="personal-status-text" class="text-xs font-mono text-slate-300 leading-relaxed">
+                        Centang tombol "SAYA SUDAH KUMPUL" pada tugas. Progres Anda otomatis tersimpan di Cloud dan sinkron ke HP/Laptop lain.
+                    </p>
+                </div>
+
+                <!-- Urgent Radar Widget Box -->
+                <div class="brutal-card bg-[#FF0033] text-white p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b-2 border-black pb-2.5">
+                        <h3 class="font-grotesk font-black text-base text-white flex items-center gap-2">
+                            <i data-lucide="siren" class="w-5 h-5 text-[#FFE600] animate-bounce"></i> RADAR DEADLINE
+                        </h3>
+                    </div>
+                    <div id="urgent-radar-list" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Desktop Utilities Box -->
+                <div class="brutal-card bg-white p-5 space-y-3">
+                    <h3 class="font-grotesk font-black text-base text-black flex items-center gap-2 border-b-2 border-black pb-2">
+                        <i data-lucide="settings" class="w-5 h-5 text-blue-600"></i> PENGATURAN SYNC
+                    </h3>
+                    <p class="text-xs font-bold text-slate-600 mb-2">
+                        Hubungkan ID Anda ke perangkat lain untuk sinkronisasi progres 100%.
+                    </p>
+                    <button onclick="openShareModal()" class="brutal-btn bg-black text-white w-full py-2.5 text-xs md:text-sm rounded-xl">
+                        <i data-lucide="smartphone-nfc" class="w-4 h-4 text-[#FFE600]"></i> Kelola Perangkat & Cloud
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION DOCK (ERGONOMICS FOR SMARTPHONES) -->
+    <nav class="mobile-nav-bar lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-4 border-black pt-2 pb-[env(safe-area-inset-bottom)] px-2 z-40 flex items-center justify-around shadow-[0_-4px_12px_rgba(0,0,0,0.15)]">
+        <button onclick="filterByTab('all')" class="flex flex-col items-center gap-1 text-black hover:text-red-600 py-1.5 px-3 min-w-[64px]">
+            <i data-lucide="layers" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold font-mono">Papan</span>
+        </button>
+        <button onclick="filterByTab('urgent')" class="flex flex-col items-center gap-1 text-black hover:text-red-600 relative py-1.5 px-3 min-w-[64px]">
+            <i data-lucide="flame" class="w-6 h-6 text-red-600"></i>
+            <span class="text-[10px] font-bold font-mono">Kritis</span>
+        </button>
+        <button onclick="openModal()" id="mobile-nav-add-btn" class="flex flex-col items-center justify-center w-14 h-14 bg-[#FFE600] border-3 border-black rounded-full shadow-[2px_2px_0px_#000] -mt-8 text-black font-extrabold hidden">
+            <i data-lucide="plus" class="w-7 h-7 stroke-[3]"></i>
+        </button>
+        <button onclick="openShareModal()" class="flex flex-col items-center gap-1 text-black hover:text-blue-600 py-1.5 px-3 min-w-[64px]">
+            <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold font-mono">Sync</span>
+        </button>
+        <button onclick="toggleWidgetMode(true)" class="flex flex-col items-center gap-1 text-black hover:text-yellow-600 py-1.5 px-3 min-w-[64px]">
+            <i data-lucide="layout-grid" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold font-mono">Widget</span>
+        </button>
+    </nav>
+
+    <!-- SHARE & CLOUD SYNC MODAL -->
+    <div id="share-modal-backdrop" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4 transition-all duration-300">
+        <div class="modal-content-container brutal-card bg-white max-w-2xl w-full p-5 sm:p-8 relative max-h-[90vh] overflow-y-auto space-y-5">
+            
+            <div class="flex items-center justify-between border-b-3 border-black pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#FFE600] border-2 border-black rounded-xl flex items-center justify-center font-grotesk font-black text-xl">
+                        <i data-lucide="cloud-lightning" class="w-6 h-6 text-black"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-grotesk font-black text-black leading-tight">
+                            Pengaturan Realtime & Sync
+                        </h2>
+                        <p class="text-xs font-mono font-bold text-slate-500">Sinkronkan data ke seluruh perangkat</p>
+                    </div>
+                </div>
+                <button onclick="closeShareModal()" class="brutal-btn bg-[#FF0033] text-white p-1.5 rounded-xl hover:bg-red-600">
+                    <i data-lucide="x" class="w-6 h-6 stroke-[3]"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button id="share-tab-btn-cloud" onclick="switchShareTab('cloud')" class="brutal-btn bg-[#FFE600] text-black py-2.5 text-xs md:text-sm rounded-xl">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i> Koneksi Perangkat Pribadi
+                </button>
+                <button id="share-tab-btn-qr" onclick="switchShareTab('qr')" class="brutal-btn bg-white text-black py-2.5 text-xs md:text-sm rounded-xl">
+                    <i data-lucide="database" class="w-4 h-4"></i> Database Kelas (PJ)
+                </button>
+            </div>
+
+            <div id="share-tab-cloud" class="space-y-4">
+                <div class="bg-black text-white border-2 border-black p-4 rounded-xl space-y-2">
+                    <h3 class="text-sm font-grotesk font-black text-[#FFE600] flex items-center gap-2">
+                        <i data-lucide="fingerprint" class="w-4 h-4"></i> ID Mahasiswa (Untuk Sync Progress)
+                    </h3>
+                    <p class="text-xs font-medium text-slate-300 leading-relaxed">
+                        Masukkan ID ini di HP/Laptop Anda yang lain agar ceklis tugas tersinkronisasi secara otomatis!
+                    </p>
+                    <div class="flex gap-2 mt-2">
+                        <input type="text" id="input-student-id" class="brutal-input w-full px-3 py-2 text-sm font-mono text-black font-black tracking-wider text-center" placeholder="MHS-XXXX">
+                        <button onclick="saveStudentId()" class="brutal-btn bg-[#FFE600] text-black px-4 py-2 text-sm rounded-xl shrink-0">
+                            Simpan & Sync
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 border-2 border-black p-4 rounded-xl text-center space-y-3">
+                    <h3 class="text-sm font-grotesk font-black text-black">Scan URL Web Ini di HP Lain</h3>
+                    <div id="qrcode-container" class="flex justify-center my-2 p-3 bg-white border-2 border-black rounded-xl w-fit mx-auto shadow-[3px_3px_0px_#000]"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="share-url-input" readonly class="brutal-input w-full px-3 py-2 text-xs font-mono bg-slate-100">
+                        <button onclick="copyShareUrl()" class="brutal-btn bg-black text-white px-4 py-2 text-xs rounded-xl shrink-0">
+                            Salin
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="share-tab-qr" class="hidden space-y-4">
+                <div class="bg-yellow-50 border-2 border-black p-4 rounded-xl space-y-2">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="wifi" class="w-5 h-5 text-emerald-600"></i>
+                        <h3 class="text-sm font-grotesk font-black text-black">Status Database Kelas:</h3>
+                        <span id="cloud-status-badge" class="brutal-badge bg-emerald-400 text-black text-[10px]">TERHUBUNG</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-700 leading-relaxed">
+                        Firebase Database mengatur tugas secara publik. Gunakan konfigurasi JSON Anda sendiri jika ingin membuat Room Kelas khusus.
+                    </p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono font-extrabold uppercase text-slate-700 mb-1.5">ID Room Sync (Saluran Kelas):</label>
+                        <input type="text" id="input-room-id" value="tpb73_itera_2026" class="brutal-input w-full px-3 py-2.5 text-sm font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono font-extrabold uppercase text-slate-700 mb-1.5">Custom Firebase Config (Untuk Webmaster):</label>
+                        <textarea id="input-firebase-config" rows="3" placeholder='{"apiKey": "...", "databaseURL": "..."}' class="brutal-input w-full px-3 py-2 text-xs font-mono"></textarea>
+                    </div>
+
+                    <button onclick="saveAndConnectCloudSync()" class="brutal-btn bg-black text-white w-full py-3 text-sm rounded-xl font-black">
+                        <i data-lucide="database-zap" class="w-4 h-4 text-[#FFE600]"></i> Terapkan Pengaturan Kelas
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ... (MODAL UNGGAH TUGAS, DETAIL, & PIN PJ SAMA SEPERTI SEBELUMNYA HANYA DIPERBAIKI PADDING) ... -->
+    <!-- CREATE / EDIT TASK MODAL -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="modal-content-container brutal-card bg-white max-w-xl w-full p-5 sm:p-7 relative max-h-[90vh] overflow-y-auto space-y-4">
+            
+            <div class="flex items-center justify-between border-b-3 border-black pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#FFE600] border-2 border-black rounded-xl flex items-center justify-center font-grotesk font-black text-xl">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-black"></i>
+                    </div>
+                    <div>
+                        <h2 id="modal-title" class="text-xl md:text-2xl font-grotesk font-black text-black">
+                            Unggah Tugas
+                        </h2>
+                        <p class="text-[10px] md:text-xs font-mono font-bold text-slate-500">Mode PJ Matkul</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal()" class="brutal-btn bg-[#FF0033] text-white p-1.5 rounded-xl hover:bg-red-600">
+                    <i data-lucide="x" class="w-5 h-5 stroke-[3]"></i>
+                </button>
+            </div>
+
+            <form id="task-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="form-task-id">
+
+                <div>
+                    <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Jenis Entri:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="setFormType('assignment')" id="btn-type-assignment" class="brutal-btn bg-[#FFE600] text-black py-2.5 text-xs md:text-sm rounded-xl">
+                            <i data-lucide="book-open" class="w-4 h-4"></i> Tugas
+                        </button>
+                        <button type="button" onclick="setFormType('announcement')" id="btn-type-announcement" class="brutal-btn bg-white text-black py-2.5 text-xs md:text-sm rounded-xl">
+                            <i data-lucide="megaphone" class="w-4 h-4"></i> Info
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Judul *</label>
+                    <input type="text" id="input-title" required placeholder="Contoh: Laporan Topik 4" class="brutal-input w-full px-4 py-2.5 text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Mata Kuliah *</label>
+                        <input type="text" id="input-course" required placeholder="Fisika Dasar" class="brutal-input w-full px-4 py-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Nama PJ</label>
+                        <input type="text" id="input-pj" placeholder="Dimas" class="brutal-input w-full px-4 py-2.5 text-sm">
+                    </div>
+                </div>
+
+                <div id="deadline-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Waktu Deadline *</label>
+                        <input type="datetime-local" id="input-deadline" class="brutal-input w-full px-4 py-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Prioritas</label>
+                        <select id="input-priority" class="brutal-input w-full px-4 py-2.5 text-sm bg-white">
+                            <option value="HIGH">🔥 Tinggi (Wajib)</option>
+                            <option value="MEDIUM" selected>⚡ Normal</option>
+                            <option value="LOW">☕ Opsional</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-mono font-extrabold uppercase text-slate-700 mb-1.5">Instruksi Pengerjaan</label>
+                    <textarea id="input-desc" rows="2" placeholder="Catatan format, kelompok..." class="brutal-input w-full px-4 py-2.5 text-sm leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t-2 border-black">
+                    <button type="button" onclick="closeModal()" class="brutal-btn bg-slate-200 text-black px-4 py-2.5 text-sm rounded-xl">
+                        Batal
+                    </button>
+                    <button type="submit" class="brutal-btn bg-[#FFE600] text-black px-6 py-2.5 text-sm rounded-xl font-black">
+                        💾 SIMPAN & BROADCAST
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN PASSCODE MODAL -->
+    <div id="passcode-modal-backdrop" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="brutal-card bg-white max-w-xs w-full p-6 text-center space-y-4">
+            <div class="w-12 h-12 bg-[#FFE600] border-2 border-black rounded-xl flex items-center justify-center mx-auto text-2xl font-black">
+                <i data-lucide="key-round" class="w-6 h-6 text-black"></i>
+            </div>
+            <h3 class="text-xl font-grotesk font-black text-black">PIN PJ Matkul</h3>
+            <p class="text-xs font-bold text-slate-600">Masukkan Passcode PIN PJ (Default: 1234):</p>
+            <input type="password" id="input-pj-pin" placeholder="****" class="brutal-input w-full text-center py-2.5 text-lg tracking-[0.5em] font-black">
+            <div class="flex gap-2 mt-2">
+                <button onclick="closePasscodeModal()" class="brutal-btn bg-slate-200 text-black w-1/2 py-2 text-sm rounded-xl">Batal</button>
+                <button onclick="verifyPJPin()" class="brutal-btn bg-black text-[#FFE600] w-1/2 py-2 text-sm rounded-xl font-black">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- REALTIME SYNC CORE UPGRADE --- //
+        
+        // 1. Setup Identifier untuk Sync Antar Perangkat Pribadi (Cross-Device Progress)
+        let studentId = localStorage.getItem('tpb73_student_id');
+        if (!studentId) {
+            studentId = 'MHS-' + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('tpb73_student_id', studentId);
+        }
+        document.getElementById('input-student-id').value = studentId;
+        document.getElementById('desktop-user-id').innerText = studentId;
+        document.getElementById('mobile-user-id').innerText = studentId;
+
+        const DEFAULT_FIREBASE_CONFIG = {
+            // Gunakan project Dummy, atau user diwajibkan set manual
+            apiKey: "AIzaSyB3XvY1Z2A3B4C5D6E7F8G9H0I1J2K3L4M",
+            authDomain: "tpb73-itera.firebaseapp.com",
+            databaseURL: "https://tpb73-itera-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "tpb73-itera"
+        };
+
+        const INITIAL_MOCK_TASKS = [
+            {
+                id: 'task-1', type: 'assignment', title: 'Laporan Topik 3', course: 'Fisika Dasar II',
+                pjName: 'Rian', deadline: new Date(Date.now() + 18000000).toISOString(), priority: 'HIGH', desc: 'Format PDF.'
+            },
+            {
+                id: 'task-2', type: 'assignment', title: 'Tugas Latihan Integral', course: 'Kalkulus II',
+                pjName: 'Anisa', deadline: new Date(Date.now() + 172800000).toISOString(), priority: 'MEDIUM', desc: 'Kerjakan Soal Bab 14.'
+            }
+        ];
+
+        let tasks = [];
+        let personalTurnIns = {};
+        let currentRole = 'student';
+        let currentTab = 'all';
+        let formType = 'assignment';
+        let isWidgetMode = false;
+
+        let firebaseDb = null;
+        let isCloudConnected = false;
+        let tasksListenerRef = null;
+        let progressListenerRef = null;
+        let currentRoomId = localStorage.getItem('tpb73_room_id') || 'tpb73_itera_2026';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTasksFromStorage();
+            loadPersonalTurnIns();
+            initRealtimeFirebaseSync();
+            renderDashboard();
+            setInterval(updateLiveClockAndStatus, 1000);
+            lucide.createIcons();
+        });
+
+        // 2. Tab Synchronization (Realtime antar Tab di Device yang sama tanpa perlu Firebase jalan)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'tpb73_tasks_v2' || e.key === 'tpb73_personal_turnins' || e.key === 'tpb73_student_id') {
+                studentId = localStorage.getItem('tpb73_student_id') || studentId;
+                document.getElementById('desktop-user-id').innerText = studentId;
+                document.getElementById('mobile-user-id').innerText = studentId;
+                
+                loadTasksFromStorage();
+                loadPersonalTurnIns();
+                renderDashboard(true);
+            }
+        });
+
+        function saveStudentId() {
+            const newVal = document.getElementById('input-student-id').value.trim();
+            if (newVal) {
+                studentId = newVal;
+                localStorage.setItem('tpb73_student_id', studentId);
+                document.getElementById('desktop-user-id').innerText = studentId;
+                document.getElementById('mobile-user-id').innerText = studentId;
+                initRealtimeFirebaseSync(); // Restart listener with new ID
+                showToast(`✅ ID Mahasiswa diubah ke: ${studentId}`);
+            }
+        }
+
+        function initRealtimeFirebaseSync() {
+            let activeConfig = DEFAULT_FIREBASE_CONFIG;
+            const savedCustomConfig = localStorage.getItem('tpb73_firebase_config');
+            if (savedCustomConfig) {
+                try { activeConfig = JSON.parse(savedCustomConfig); } catch(e) {}
+            }
+
+            if (typeof firebase !== 'undefined') {
+                try {
+                    if (!firebase.apps.length) firebase.initializeApp(activeConfig);
+                    firebaseDb = firebase.database();
+                    document.getElementById('current-room-tag').innerText = currentRoomId;
+
+                    // Sync 1: Class Tasks
+                    if (tasksListenerRef) tasksListenerRef.off();
+                    tasksListenerRef = firebaseDb.ref(`classes/${currentRoomId}/tasks`);
+                    tasksListenerRef.on('value', (snapshot) => {
+                        const cloudTasks = snapshot.val();
+                        if (cloudTasks && Array.isArray(cloudTasks)) {
+                            tasks = cloudTasks;
+                            localStorage.setItem('tpb73_tasks_v2', JSON.stringify(tasks));
+                            renderDashboard(true);
+                        }
+                    }, () => updateCloudBadgeUI(false));
+
+                    // Sync 2: Personal Progress based on Student ID
+                    if (progressListenerRef) progressListenerRef.off();
+                    progressListenerRef = firebaseDb.ref(`classes/${currentRoomId}/students/${studentId}/progress`);
+                    progressListenerRef.on('value', (snapshot) => {
+                        const cloudProgress = snapshot.val();
+                        if (cloudProgress) {
+                            personalTurnIns = cloudProgress;
+                            localStorage.setItem('tpb73_personal_turnins', JSON.stringify(personalTurnIns));
+                            renderDashboard(false);
+                        }
+                    });
+
+                    isCloudConnected = true;
+                    updateCloudBadgeUI(true);
+
+                } catch(err) {
+                    console.error("Firebase Initialization Error:", err);
+                    isCloudConnected = false;
+                    updateCloudBadgeUI(false);
+                }
+            } else {
+                updateCloudBadgeUI(false);
+            }
+        }
+
+        function pushTasksToCloud() {
+            localStorage.setItem('tpb73_tasks_v2', JSON.stringify(tasks));
+            if (isCloudConnected && firebaseDb) {
+                firebaseDb.ref(`classes/${currentRoomId}/tasks`).set(tasks);
+            }
+        }
+
+        function savePersonalTurnIns() {
+            localStorage.setItem('tpb73_personal_turnins', JSON.stringify(personalTurnIns));
+            // Push progress to cloud linked to Student ID
+            if (isCloudConnected && firebaseDb) {
+                firebaseDb.ref(`classes/${currentRoomId}/students/${studentId}/progress`).set(personalTurnIns);
+            }
+        }
+
+        function togglePersonalTurnIn(taskId) {
+            personalTurnIns[taskId] = !personalTurnIns[taskId];
+            savePersonalTurnIns(); // Saves locally & Pushes to Cloud for Cross-Device Sync
+
+            const task = tasks.find(t => t.id === taskId);
+            if (task && task.type === 'assignment' && personalTurnIns[taskId]) {
+                confetti({ particleCount: 30, spread: 40, origin: { y: 0.7 }});
+                showToast('✨ Status Tersimpan ke Cloud!');
+            }
+            renderDashboard();
+        }
+
+        // --- UI & LAYOUT FUNCTIONALITIES --- //
+
+        function loadTasksFromStorage() {
+            const saved = localStorage.getItem('tpb73_tasks_v2');
+            tasks = saved ? JSON.parse(saved) : INITIAL_MOCK_TASKS;
+        }
+
+        function loadPersonalTurnIns() {
+            const saved = localStorage.getItem('tpb73_personal_turnins');
+            personalTurnIns = saved ? JSON.parse(saved) : {};
+        }
+
+        function updateCloudBadgeUI(connected) {
+            const badge = document.getElementById('cloud-status-badge');
+            const headerBadge = document.getElementById('header-sync-status');
+            const headerText = document.getElementById('header-sync-text');
+
+            if (connected) {
+                if (badge) badge.className = "brutal-badge bg-emerald-400 text-black text-[10px]";
+                if (headerBadge) headerBadge.className = "brutal-badge bg-black text-[#FFE600] px-3 py-1.5 text-[11px] flex items-center gap-2 cursor-pointer hover:bg-slate-800";
+                if (headerText) headerText.innerText = "REALTIME SYNCED";
+            } else {
+                if (badge) badge.className = "brutal-badge bg-slate-200 text-black text-[10px]";
+                if (headerBadge) headerBadge.className = "brutal-badge bg-red-600 text-white px-3 py-1.5 text-[11px] flex items-center gap-2 cursor-pointer";
+                if (headerText) headerText.innerText = "LOCAL MODE";
+            }
+        }
+
+        function updateLiveClockAndStatus() {
+            const clockEl = document.getElementById('live-time-clock');
+            if (clockEl) clockEl.innerText = new Date().toLocaleTimeString('id-ID') + ' WIB';
+            renderDashboard(false);
+        }
+
+        // --- DASHBOARD RENDERER (Responsive Grid) --- //
+
+        function renderDashboard(fullRefresh = true) {
+            if (fullRefresh) updateCourseOptionsDropdown();
+            updateCountsAndStats();
+
+            const container = document.getElementById('task-list-container');
+            const emptyState = document.getElementById('empty-state');
+            const filteredTasks = getFilteredTasks();
+
+            container.innerHTML = '';
+            if (filteredTasks.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filteredTasks.forEach(task => {
+                    container.appendChild(createTaskCardElement(task));
+                });
+            }
+            renderUrgentRadar();
+            lucide.createIcons();
+        }
+
+        function createTaskCardElement(task) {
+            const card = document.createElement('div');
+            const now = new Date();
+            const deadlineDate = task.deadline ? new Date(task.deadline) : null;
+            const isExpired = deadlineDate && deadlineDate < now;
+            const msLeft = deadlineDate ? deadlineDate - now : 0;
+            const hoursLeft = msLeft / (1000 * 3600);
+            
+            const isUrgent = !isExpired && task.type === 'assignment' && hoursLeft <= 24;
+            const isTurnedInByMe = !!personalTurnIns[task.id];
+
+            let cardClasses = "brutal-card p-4 md:p-5 relative overflow-hidden transition-all flex flex-col h-full ";
+            
+            if (isTurnedInByMe) cardClasses += "task-completed-card ";
+            else if (isExpired) cardClasses += "bg-slate-200 border-slate-600 opacity-80 ";
+            else if (isUrgent) cardClasses += "bg-[#FF0033] text-white border-black ";
+            else cardClasses += "bg-white text-black border-black ";
+
+            card.className = cardClasses;
+
+            let deadlineHtml = '';
+            if (task.type === 'assignment' && deadlineDate) {
+                const formattedDate = deadlineDate.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const hrs = Math.floor(msLeft / (1000 * 3600));
+                
+                deadlineHtml = `
+                    <div class="mt-auto pt-3 border-t-2 ${isUrgent ? 'border-white/30' : 'border-black/10'}">
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                            <div class="flex items-center gap-1.5 font-bold truncate">
+                                <i data-lucide="clock" class="w-4 h-4 shrink-0"></i> ${isExpired ? 'BERAKHIR' : formattedDate}
+                            </div>
+                            ${!isExpired ? `<span class="bg-black text-[#FFE600] px-2 py-1 rounded font-black text-[10px] animate-pulse">SISA ${hrs} JAM</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3 mb-3">
+                    <div class="flex flex-wrap gap-1.5">
+                        <span class="brutal-badge bg-black text-white">${task.course}</span>
+                    </div>
+                    ${currentRole === 'pj' ? `
+                        <button onclick="deleteTask('${task.id}')" class="text-black hover:text-red-500 bg-white rounded p-1 border-2 border-black" title="Hapus">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    ` : ''}
+                </div>
+                
+                <h3 class="text-base md:text-lg font-grotesk font-black leading-tight mb-2 flex-grow">
+                    ${task.title}
+                </h3>
+
+                ${task.type === 'assignment' ? `
+                    <button onclick="togglePersonalTurnIn('${task.id}')" class="brutal-btn ${isTurnedInByMe ? 'bg-emerald-400 text-black' : (isUrgent ? 'bg-[#FFE600] text-black' : 'bg-black text-white')} w-full py-2 mb-3 text-xs md:text-sm rounded-xl transition-all">
+                        <i data-lucide="${isTurnedInByMe ? 'check-circle-2' : 'circle'}" class="w-4 h-4 stroke-[3]"></i>
+                        <span>${isTurnedInByMe ? 'SELESAI (SYNCED)' : 'TANDAI SELESAI'}</span>
+                    </button>
+                ` : ''}
+
+                ${deadlineHtml}
+            `;
+            return card;
+        }
+
+        // --- SYSTEM UTILS (Filter, Modal, Role, Setup) --- //
+
+        function getFilteredTasks() {
+            const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+            const course = document.getElementById('filter-course')?.value || 'ALL';
+            const sort = document.getElementById('sort-order')?.value || 'deadline-asc';
+            const now = new Date();
+
+            let filtered = tasks.filter(t => {
+                const match = t.title.toLowerCase().includes(query) || t.course.toLowerCase().includes(query);
+                if (!match || (course !== 'ALL' && t.course !== course)) return false;
+
+                const d = t.deadline ? new Date(t.deadline) : null;
+                const isExp = d && d < now;
+                const hrLeft = d ? (d - now) / 3600000 : 999;
+
+                if (currentTab === 'upcoming') return t.type === 'assignment' && !isExp;
+                if (currentTab === 'urgent') return t.type === 'assignment' && !isExp && hrLeft <= 24;
+                if (currentTab === 'announcement') return t.type === 'announcement';
+                return true; // 'all'
+            });
+
+            return filtered.sort((a, b) => {
+                if (!a.deadline) return 1; if (!b.deadline) return -1;
+                return sort === 'deadline-desc' ? new Date(b.deadline) - new Date(a.deadline) : new Date(a.deadline) - new Date(b.deadline);
+            });
+        }
+
+        function updateCountsAndStats() {
+            const now = new Date();
+            let totalA = 0, myDone = 0, urgentC = 0, upC = 0;
+
+            tasks.forEach(t => {
+                if (t.type === 'assignment') {
+                    totalA++;
+                    if (personalTurnIns[t.id]) myDone++;
+                    if (t.deadline && new Date(t.deadline) > now) {
+                        upC++;
+                        if ((new Date(t.deadline) - now) / 3600000 <= 24) urgentC++;
+                    }
+                }
+            });
+
+            const p = totalA > 0 ? Math.round((myDone / totalA) * 100) : 100;
+            document.getElementById('personal-progress-percent').innerText = `${p}%`;
+            document.getElementById('personal-progress-bar-fill').style.width = `${p}%`;
+            
+            document.getElementById('mobile-stat-upcoming').innerText = upC;
+            document.getElementById('mobile-stat-urgent').innerText = urgentC;
+            document.getElementById('mobile-stat-progress').innerText = `${p}%`;
+        }
+
+        function renderUrgentRadar() {
+            const container = document.getElementById('urgent-radar-list');
+            const now = new Date();
+            const urgents = tasks.filter(t => t.type === 'assignment' && t.deadline && (new Date(t.deadline) - now) / 3600000 > 0 && (new Date(t.deadline) - now) / 3600000 <= 24).sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+            
+            container.innerHTML = '';
+            if(!urgents.length) {
+                container.innerHTML = `<div class="bg-black/20 p-3 rounded-xl text-center text-xs font-bold text-white"><i data-lucide="shield-check" class="inline w-4 h-4 text-emerald-400"></i> Aman, tidak ada Kritis</div>`;
+            } else {
+                urgents.slice(0,3).forEach(t => {
+                    const hrs = Math.floor((new Date(t.deadline) - now) / 3600000);
+                    container.innerHTML += `<div class="bg-black text-white p-3 rounded-xl border-2 border-black flex justify-between items-center"><div class="truncate pr-2"><div class="text-[10px] text-[#FFE600] font-mono">${t.course}</div><div class="text-sm font-bold truncate">${t.title}</div></div><span class="bg-[#FF0033] px-2 py-1 rounded text-[10px] font-black shrink-0 animate-pulse">${hrs} JAM</span></div>`;
+                });
+            }
+        }
+
+        function filterByTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.replace('bg-[#FFE600]', 'bg-white'));
+            document.getElementById(`tab-${tab}`).classList.replace('bg-white', 'bg-[#FFE600]');
+            renderDashboard(false);
+        }
+
+        function openModal() { document.getElementById('modal-backdrop').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal-backdrop').classList.add('hidden'); }
+        function requestPJMode() { document.getElementById('passcode-modal-backdrop').classList.remove('hidden'); }
+        function closePasscodeModal() { document.getElementById('passcode-modal-backdrop').classList.add('hidden'); }
+        function setRole(r) { currentRole = r; document.getElementById('btn-create-task').classList.toggle('hidden', r!=='pj'); document.getElementById('mobile-nav-add-btn').classList.toggle('hidden', r!=='pj'); renderDashboard(); }
+        function verifyPJPin() { if(document.getElementById('input-pj-pin').value === '1234') { closePasscodeModal(); setRole('pj'); showToast('🔑 Akses PJ Terbuka'); } else showToast('❌ PIN Salah'); }
+        function setFormType(t) { formType = t; document.getElementById('deadline-fields').classList.toggle('hidden', t!=='assignment'); }
+        function openShareModal() { document.getElementById('share-modal-backdrop').classList.remove('hidden'); switchShareTab('cloud'); }
+        function closeShareModal() { document.getElementById('share-modal-backdrop').classList.add('hidden'); }
+        function switchShareTab(t) { ['cloud', 'qr'].forEach(id => { document.getElementById(`share-tab-${id}`).classList.toggle('hidden', id!==t); document.getElementById(`share-tab-btn-${id}`).classList.toggle('bg-[#FFE600]', id===t); document.getElementById(`share-tab-btn-${id}`).classList.toggle('bg-white', id!==t); }); }
+        function showToast(m) { const t=document.getElementById('toast'); document.getElementById('toast-message').innerText=m; t.classList.remove('-translate-y-32'); setTimeout(()=>t.classList.add('-translate-y-32'), 3000); }
+        function updateCourseOptionsDropdown() { const s = document.getElementById('filter-course'); const cur = s.value; s.innerHTML = '<option value="ALL">Semua Mata Kuliah TPB</option>'; [...new Set(tasks.map(t=>t.course))].forEach(c => s.innerHTML += `<option value="${c}">${c}</option>`); s.value = cur; }
+        
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const t = {
+                id: 'task-'+Date.now(), type: formType,
+                title: document.getElementById('input-title').value,
+                course: document.getElementById('input-course').value,
+                pjName: document.getElementById('input-pj').value || 'PJ',
+                deadline: formType==='assignment' ? new Date(document.getElementById('input-deadline').value).toISOString() : null,
+                priority: document.getElementById('input-priority').value,
+                desc: document.getElementById('input-desc').value
+            };
+            tasks.unshift(t); pushTasksToCloud(); closeModal(); renderDashboard(); showToast('🚀 Tugas Disebarkan');
+        }
+        function deleteTask(id) { tasks = tasks.filter(t=>t.id!==id); pushTasksToCloud(); renderDashboard(); showToast('🗑️ Tugas Dihapus'); }
+    </script>
+</body>
+</html>
+```eof
